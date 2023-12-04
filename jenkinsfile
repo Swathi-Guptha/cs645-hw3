@@ -1,0 +1,60 @@
+def generateTag() {
+    return "build-" + new Date().format("yyyyMMdd-HHmmss")
+}
+
+pipeline{
+    environment
+    {
+        registry = "swathiguptha/student-form-image"
+        registryCredential = "docker-login"
+    }
+    agent any
+
+    tools
+    {
+        maven 'Maven'
+    }
+    stages
+    {
+
+        stage('Build')
+        {
+            steps
+            {
+                script
+                {
+                    sh 'echo ${BUILD_TIMESTAMP}'
+                    sh 'mvn clean package'
+                    tag = generateTag()
+                    image = docker.build("swathiguptha/api-image:"+tag)
+                }
+            }
+        }
+        stage('deploy docker image')
+        {
+            steps
+            {
+                script
+                {
+                    docker.withRegistry('',registryCredential)
+                    {
+                        image.push()
+                    }
+                }
+            }
+        }
+        stage('Deploying rancher to single nodes')
+        {
+            steps
+            {
+                script
+                {
+
+                    sh 'pwd'
+                    sh 'kubectl --kubeconfig=/var/lib/jenkins/.kube/config1.yaml set image deployment/spring-deployment container-0=swathiguptha/api-image:'+tag
+                }
+            }
+        }
+
+    }
+}
