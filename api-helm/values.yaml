@@ -5,10 +5,10 @@
 replicaCount: 3
 
 image:
-  repository: spring-api-image
+  repository: "swathiguptha/spring-api-image"
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -41,7 +41,7 @@ securityContext: {}
 
 service:
   type: NodePort
-  port: 8080
+  port: 8088
 
 ingress:
   enabled: false
